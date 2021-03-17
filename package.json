@@ -1,12 +1,25 @@
 {
   "name": "raid-sniper",
-  "version": "1.0.0",
+  "version": "0.2.0",
   "description": "a bot that tells you when there are x amount of people at your place",
-  "main": "index.js",
+  "main": "dist/main.js",
   "author": "Zenthial <iamzenthial@gmail.com>",
   "license": "MIT",
+  "scripts": {
+    "start": "nodemon dist/main.js",
+    "build:dev": "tsc --watch --preserveWatchOutput",
+    "dev": "concurrently \"npm:build:dev\" \"npm:start\""
+  },
   "dependencies": {
     "discord.js": "^12.5.1",
-    "node-cron": "^3.0.0"
+    "firebase": "^8.3.0",
+    "node-cron": "^3.0.0",
+    "node-fetch": "^2.6.1"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.35",
+    "@types/node-cron": "^2.0.3",
+    "@types/node-fetch": "^2.5.8",
+    "currently": "^0.0.8"
   }
 }
