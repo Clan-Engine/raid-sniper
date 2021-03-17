@@ -1,5 +1,5 @@
-import { Collection } from "discord.js";
 import Firebase from "firebase";
+import { stringify } from "node:querystring";
 import { raidsniperConfig } from "./firebaseConfig";
 
 let sniperApp = Firebase.initializeApp(raidsniperConfig);
@@ -15,7 +15,7 @@ let sniperDatabase = sniperApp.database()
                 ping: bool
             }
         }
-        checkedServers: {
+        activeServers: {
             id: {
                 guids
             }
@@ -23,7 +23,15 @@ let sniperDatabase = sniperApp.database()
     }
 */
 
-interface ServerInfo {
+export interface GuildInfo {
+    checkTime: number,
+    lastCheck: number,
+    channel: string,
+    servers: Array<ServerInfo>,
+    activeServers: Array<Map<string, Array<string>>>
+}
+
+export interface ServerInfo {
     requiredNumber: number
     ping: boolean
 }
@@ -31,13 +39,13 @@ interface ServerInfo {
 export default class RaidDatabase {
     private database = sniperDatabase;
 
-    public async CreateGuild(snowflake: string) {
+    public async CreateGuild(snowflake: string, channelId: string) {
         let guildRef = this.database.ref(`guilds/${snowflake}`);
         await guildRef.set({
             checkTime: 60,
-            lastCheck: 0,
+            channel: channelId,
             servers: {},
-            checkedServers: {}
+            activeServers: {}
         })
     }
 
@@ -45,6 +53,14 @@ export default class RaidDatabase {
         let guildRef = this.database.ref(`guilds/${snowflake}`);
         await guildRef.remove();
     }
+
+    public async SetChannel(snowflake: string, channelId: string) {
+        let guildRef = this.database.ref(`guilds/${snowflake}`);
+        await guildRef.update({
+            channel: channelId
+        })
+    }
+
 
     public async AddServer(snowflake: string, serverid: number, requiredPlayers: number, shouldPing?: boolean) {
         let guildServersRef = this.database.ref(`guilds/${snowflake}/servers/${serverid}`);
@@ -61,10 +77,10 @@ export default class RaidDatabase {
         })
     }
 
-    public async GetServers(snowflake: string): Promise<Collection<string, ServerInfo>> {
+    public async GetServers(snowflake: string): Promise<Map<string, ServerInfo>> {
         let guildRef = this.database.ref(`guilds/${snowflake}/servers`);
         let serversSnapshot = await guildRef.get();
-        let serverCollection = new Collection<string, ServerInfo>();
+        let serverCollection = new Map<string, ServerInfo>();
         
         // oh my god, a proper way to loop through data?
         serversSnapshot.forEach(serverSnapshot => {
@@ -75,6 +91,49 @@ export default class RaidDatabase {
         })
 
         return serverCollection;
+    }
+
+    public async GetServerInfo(snowflake: string, serverId: string): Promise<ServerInfo | null> {
+        let serverCollection = await this.GetServers(snowflake);
+        let serverInfo = serverCollection.get(serverId);
+        if (serverInfo) {
+            return serverInfo;
+        } else {
+            return null;
+        }
+    }
+
+    public async AddActiveServer(snowflake: string, serverid: string, guid: string) {
+        let activeServerRef = this.database.ref(`guilds/${snowflake}/activeServers/${serverid}`);
+        await activeServerRef.update({
+            [guid]: Date.now()
+        })
+    }
+
+    public async RemoveActiveServer(snowflake: string, serverid: string, guid: string) {
+        let activeServerRef = this.database.ref(`guilds/${snowflake}/activeServers/${serverid}/${guid}`);
+        await activeServerRef.remove();
+    }
+
+    public async GetActiveServers(snowflake: string, serverid: string): Promise<Map<string, number>> {
+        let activeServerRef = this.database.ref(`guilds/${snowflake}/activeServers/${serverid}`);
+        let activeServerSnapshot = await activeServerRef.get();
+        let activeServerGUIDs = new Map<string, number>();
+        activeServerSnapshot.forEach(activeServer => {
+            let guid = activeServer.key as string;
+            let time = activeServer.val() as number;
+            activeServerGUIDs.set(guid, time);
+        })
+
+        return activeServerGUIDs;
+    }
+
+    public async GetGuildInfo(snowflake: string): Promise<GuildInfo> {
+        let guildRef = this.database.ref(`guilds/${snowflake}`);
+        let guildSnapshot = await guildRef.get();
+        let guildInfo = guildSnapshot.toJSON() as GuildInfo;
+
+        return guildInfo;
     }
 
     public async RemoveServer(snowflake: string, serverid: number) {

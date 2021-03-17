@@ -7,6 +7,8 @@ const fs_1 = __importDefault(require("fs"));
 const discord_js_1 = __importDefault(require("discord.js"));
 const config_json_1 = __importDefault(require("../constants/config.json"));
 const firebase_1 = __importDefault(require("../firebase/firebase"));
+const serverinfo_1 = require("../http/serverinfo");
+const flavor_1 = require("../constants/flavor");
 // Discord Bots now need to list what information they need access to. 
 const intents = ["GUILDS", "GUILD_MEMBERS", "GUILD_MESSAGES"];
 let commandFiles = fs_1.default.readdirSync(`${__dirname}/commands`).filter(file => file.endsWith('.js'));
@@ -20,7 +22,7 @@ class _DiscordBot {
             this.commands.set(command.name, command);
         }
     }
-    async Initialize() {
+    Initialize() {
         this.bot.on("warn", console.log);
         this.bot.on("error", console.log);
         // this.bot.on("debug", console.log);
@@ -31,6 +33,48 @@ class _DiscordBot {
             this.UpdateStatus(0);
             console.log("Bot has turned on");
         });
+    }
+    async GetGuilds() {
+        if (this.bot.user) {
+            let guildCache = this.bot.guilds.cache.array();
+            let snowflakeArray = [];
+            for (let guild of guildCache) {
+                snowflakeArray.push(guild.id);
+            }
+            return snowflakeArray;
+        }
+        else {
+            return [];
+        }
+    }
+    async PostNotification(guildSnowflake, placeId, placeServerInfo, serverInfo) {
+        let placeInfo = await serverinfo_1.GetPlaceInfo(parseInt(placeId));
+        let guild = this.bot.guilds.cache.find(guild => guild.id === guildSnowflake);
+        if (guild) {
+            let sniperChannelId = (await this.database.GetGuildInfo(guildSnowflake)).channel;
+            let sniperChannel = guild.channels.cache.find(channel => channel.id === sniperChannelId);
+            if (!sniperChannel) {
+                let channels = guild.channels.cache;
+                for (let channel of channels.values()) {
+                    if (channel.type == "text") {
+                        sniperChannel = channel;
+                        sniperChannel.send("Missing Sniper Channel! Did you delete it? Set it with !setchannel");
+                        break;
+                    }
+                }
+            }
+            let notifyEmbed = new discord_js_1.default.MessageEmbed();
+            notifyEmbed.setTitle("place notification!");
+            notifyEmbed.setDescription(`[link!](${placeInfo.Url})`);
+            notifyEmbed.setImage(`https://www.roblox.com/asset-thumbnail/image?assetId=${placeId}&width=768&height=432&format=png`);
+            notifyEmbed.setFooter(flavor_1.FOOTER_TEXT, flavor_1.FOOTER_ICON);
+            notifyEmbed.addField(`${placeInfo.Name}`, `there are ${placeServerInfo.playing || 1} out of ${placeServerInfo.maxPlayers} players at ${placeInfo.Name}`);
+            if (sniperChannel) {
+                if (serverInfo.ping)
+                    sniperChannel.send("@here");
+                sniperChannel.send(notifyEmbed);
+            }
+        }
     }
     async UpdateStatus(variation) {
         if (variation == 0) {
@@ -47,7 +91,8 @@ class _DiscordBot {
         }
     }
     async HandleGuildCreate(guild) {
-        this.database.CreateGuild(guild.id);
+        let sniperChannel = await guild.channels.create("raid-sniper-notifier");
+        this.database.CreateGuild(guild.id, sniperChannel.id);
     }
     async HandleGuildDelete(guild) {
         this.database.DeleteGuild(guild.id);
@@ -78,6 +123,7 @@ class _DiscordBot {
     async DisplayCommands(message) {
         let CommandEmbed = new discord_js_1.default.MessageEmbed();
         CommandEmbed.setTitle("Commands");
+        CommandEmbed.setFooter(flavor_1.FOOTER_TEXT, flavor_1.FOOTER_ICON);
         this.commands.forEach(commandInterface => {
             CommandEmbed.addField(commandInterface.name, commandInterface.description);
         });

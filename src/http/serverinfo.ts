@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
 
-interface ServerInfo {
+export interface PlaceServerInfo {
     id: string,
     maxPlayers: number,
     playing: number,
@@ -22,19 +22,34 @@ interface JsonResponseData {
     errors?: Array<ErrorInfo>
     previousPageCursor: string,
     nextPageCursor: string,
-    data: Array<ServerInfo>
+    data: Array<PlaceServerInfo>
 }
 
-export async function GetServers(serverId: number): Promise<Array<ServerInfo>> {
-    let response = await fetch(`https://games.roblox.com/v1/games/${serverId}/servers/Public?sortOrder=Asc&limit=10`);
+interface PlaceInfo {
+    AssetId: number,
+    Name: string,
+    Description: string,
+    Builder: string,
+    BuilderAbsoluteUrl: string
+    Url: string
+}
+
+export async function GetServers(placeId: string): Promise<Array<PlaceServerInfo>> {
+    let response = await fetch(`https://games.roblox.com/v1/games/${placeId}/servers/Public?sortOrder=Asc&limit=10`);
     let jsonData = await response.json() as JsonResponseData;
 
     return jsonData.data;
 }
 
-export async function PlaceExists(serverId: number): Promise<boolean> {
-    let response = await fetch(`https://games.roblox.com/v1/games/${serverId}/servers/Public?sortOrder=Asc&limit=10`);
+export async function PlaceExists(placeId: number): Promise<boolean> {
+    let response = await fetch(`https://games.roblox.com/v1/games/${placeId}/servers/Public?sortOrder=Asc&limit=10`);
     let jsonData = await response.json() as JsonResponseData;
 
     if (jsonData.errors) return false; else return true;
+}
+
+export async function GetPlaceInfo(placeId: number): Promise<PlaceInfo> {
+    let response = await fetch(`https://www.roblox.com/places/api-get-details?assetId=${placeId}`);
+    let jsonData = await response.json() as PlaceInfo;
+    return jsonData;
 }

@@ -1,5 +1,5 @@
 import DiscordBot from "./discord/discord";
-import Scheduler from "./scheduler/scheduler";
+import GuildController from "./guilds/controller";
 
 DiscordBot.Initialize();
-//Scheduler.Initialize();
+GuildController.CollectGuilds();
