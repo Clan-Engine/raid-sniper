@@ -1,0 +1,12 @@
+{
+  "name": "raid-sniper",
+  "version": "1.0.0",
+  "description": "a bot that tells you when there are x amount of people at your place",
+  "main": "index.js",
+  "author": "Zenthial <iamzenthial@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "discord.js": "^12.5.1",
+    "node-cron": "^3.0.0"
+  }
+}
