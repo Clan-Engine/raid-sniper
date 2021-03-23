@@ -1,8 +1,7 @@
-import Firebase from "firebase";
-import { stringify } from "node:querystring";
+import admin from "firebase-admin";
 import { raidsniperConfig } from "./firebaseConfig";
 
-let sniperApp = Firebase.initializeApp(raidsniperConfig);
+let sniperApp = admin.initializeApp(raidsniperConfig);
 let sniperDatabase = sniperApp.database()
 
 /* 

@@ -112,12 +112,6 @@ class _DiscordBot {
             if (commandFunction) {
                 commandFunction.run(message, args);
             }
-            else {
-                message.reply("Command does not exist");
-            }
-        }
-        else {
-            message.reply("Command not supplied");
         }
     }
     async DisplayCommands(message) {
