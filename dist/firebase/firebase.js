@@ -3,9 +3,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const firebase_1 = __importDefault(require("firebase"));
+const firebase_admin_1 = __importDefault(require("firebase-admin"));
 const firebaseConfig_1 = require("./firebaseConfig");
-let sniperApp = firebase_1.default.initializeApp(firebaseConfig_1.raidsniperConfig);
+let sniperApp = firebase_admin_1.default.initializeApp(firebaseConfig_1.raidsniperConfig);
 let sniperDatabase = sniperApp.database();
 class RaidDatabase {
     constructor() {

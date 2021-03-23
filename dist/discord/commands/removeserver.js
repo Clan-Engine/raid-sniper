@@ -8,13 +8,12 @@ const serverinfo_1 = require("../../http/serverinfo");
 const admincheck_1 = __importDefault(require("../utility/admincheck"));
 let database = new firebase_1.default();
 let command = {
-    name: "addserver",
-    description: "adds a server to watch for player's joining.\nformat: !addserver [serverid] [requiredPlayers]",
+    name: "removeserver",
+    description: "removes a place from the database.\nformat: !removeserver [serverid]",
     run: async (message, args) => {
         if (!admincheck_1.default(message))
             return;
         let serverId = parseInt(args[0]);
-        let requiredPlayers = parseInt(args[1]);
         let snowflake = message.guild?.id;
         if (snowflake == null)
             return;
@@ -24,10 +23,8 @@ let command = {
         }
         if (!await serverinfo_1.PlaceExists(serverId))
             return message.reply("Place does not exist");
-        if (!(requiredPlayers > 0))
-            return message.reply("Required players must be greater than 0");
-        message.channel.send(`set ${serverId} to notify at ${requiredPlayers} or above`);
-        database.AddServer(snowflake, serverId, requiredPlayers);
+        message.channel.send(`removed ${serverId}`);
+        database.RemoveServer(snowflake, serverId);
     }
 };
 exports.default = command;

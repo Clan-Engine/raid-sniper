@@ -2,7 +2,7 @@
   "name": "raid-sniper",
   "version": "0.2.0",
   "description": "a bot that tells you when there are x amount of people at your place",
-  "main": "dist/main.js",
+  "main": "dist/snipermain.js",
   "author": "Zenthial <iamzenthial@gmail.com>",
   "license": "MIT",
   "scripts": {
