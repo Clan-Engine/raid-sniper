@@ -1,4 +1,5 @@
 import RaidDatabase from "../../firebase/firebase";
+import GuildController from "../../guilds/controller";
 import { PlaceExists } from "../../http/serverinfo";
 import admincheck from "../utility/admincheck";
 import { CommandInterface } from "../utility/commandinterface";
@@ -13,7 +14,7 @@ let command: CommandInterface = {
         let serverId = parseInt(args[0]);
         let requiredPlayers = parseInt(args[1]);
 
-        let snowflake = message.guild?.id;
+        let snowflake = message.guild?.id as string;
         if (snowflake == null) return;
         if (!await PlaceExists(serverId)) return message.reply("Place does not exist");
         if (!(requiredPlayers > 0)) return message.reply("Required players must be greater than 0");
@@ -23,7 +24,8 @@ let command: CommandInterface = {
         if (serverInfo == null) return message.reply("This guild does not have that place added. Please register it with !addserver");
         
         message.channel.send(`updated ${serverId} required player's to notify to ${requiredPlayers}`);
-        database.AddServer(snowflake, serverId, requiredPlayers, serverInfo.ping);
+        await database.AddServer(snowflake, serverId, requiredPlayers, serverInfo.ping);
+        setTimeout(() => GuildController.UpdateGuild(snowflake), 5000);
     }
 }
 

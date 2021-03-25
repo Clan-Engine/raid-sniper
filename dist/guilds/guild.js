@@ -60,7 +60,7 @@ class Guild {
                             break;
                         }
                     }
-                    if (!found) {
+                    if (!found && server.playing >= placeInfo.requiredNumber) {
                         discord_1.default.PostNotification(this.snowflake, placeId, server, placeInfo);
                         this.database.AddActiveServer(this.snowflake, placeId, server.id);
                     }

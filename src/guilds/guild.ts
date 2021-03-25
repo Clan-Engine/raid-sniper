@@ -69,7 +69,7 @@ export default class Guild {
                             break;
                         }
                     }
-                    if (!found) {
+                    if (!found && server.playing >= placeInfo.requiredNumber) {
                         DiscordBot.PostNotification(this.snowflake, placeId, server, placeInfo);
                         this.database.AddActiveServer(this.snowflake, placeId, server.id);
                     }

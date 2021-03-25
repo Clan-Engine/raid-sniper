@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const firebase_1 = __importDefault(require("../../firebase/firebase"));
+const controller_1 = __importDefault(require("../../guilds/controller"));
 const serverinfo_1 = require("../../http/serverinfo");
 const admincheck_1 = __importDefault(require("../utility/admincheck"));
 let database = new firebase_1.default();
@@ -25,6 +26,7 @@ let command = {
             return message.reply("This guild does not have that place added. Please register it with !addserver");
         message.channel.send(`set ${serverId} ping to ${!serverInfo.ping}`);
         await database.UpdatePing(snowflake, serverId, !serverInfo.ping);
+        setTimeout(() => controller_1.default.UpdateGuild(snowflake), 5000);
     }
 };
 exports.default = command;

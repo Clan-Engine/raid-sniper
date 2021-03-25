@@ -1,4 +1,5 @@
 import RaidDatabase from "../../firebase/firebase";
+import GuildController from "../../guilds/controller";
 import { PlaceExists } from "../../http/serverinfo";
 import admincheck from "../utility/admincheck";
 import { CommandInterface } from "../utility/commandinterface";
@@ -12,7 +13,7 @@ let command: CommandInterface = {
         if (!admincheck(message)) return message.reply("you dont have admin");
         let serverId = parseInt(args[0]);
 
-        let snowflake = message.guild?.id;
+        let snowflake = message.guild?.id as string;
         if (snowflake == null) return;
         if (!await PlaceExists(serverId)) return message.reply("Place does not exist");
 
@@ -22,6 +23,7 @@ let command: CommandInterface = {
         
         message.channel.send(`set ${serverId} ping to ${!serverInfo.ping}`);
         await database.UpdatePing(snowflake, serverId, !serverInfo.ping);
+        setTimeout(() => GuildController.UpdateGuild(snowflake), 5000);
     }
 }
 
