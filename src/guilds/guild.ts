@@ -29,6 +29,7 @@ export default class Guild {
     }
 
     public async CollectServers() {
+        this.places = new Map<string, ServerInfo>();
         let serverCollection = await this.database.GetServers(this.snowflake);
         for (let serverId of serverCollection.keys()) {
             let serverInfo = serverCollection.get(serverId);

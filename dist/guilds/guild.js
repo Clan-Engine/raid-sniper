@@ -24,6 +24,7 @@ class Guild {
         this.checkTime = this.info.checkTime;
     }
     async CollectServers() {
+        this.places = new Map();
         let serverCollection = await this.database.GetServers(this.snowflake);
         for (let serverId of serverCollection.keys()) {
             let serverInfo = serverCollection.get(serverId);

@@ -12,7 +12,7 @@ let command = {
     description: "toggles pinging for the specified serverid.\nformat: !toggleping [serverid]",
     run: async (message, args) => {
         if (!admincheck_1.default(message))
-            return;
+            return message.reply("you dont have admin");
         let serverId = parseInt(args[0]);
         let snowflake = message.guild?.id;
         if (snowflake == null)

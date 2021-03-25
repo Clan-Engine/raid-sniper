@@ -17,6 +17,12 @@ class GuildController {
             this.AddGuild(snowflake);
         }
     }
+    static async UpdateGuild(snowflake) {
+        let guild = guilds.get(snowflake);
+        if (guild) {
+            guild.CollectServers();
+        }
+    }
     static async AddGuild(snowflake) {
         let guildToAdd = new guild_1.default(snowflake);
         guilds.set(snowflake, guildToAdd);

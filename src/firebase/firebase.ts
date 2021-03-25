@@ -1,7 +1,7 @@
-import admin from "firebase-admin";
+import firebase from "firebase";
 import { raidsniperConfig } from "./firebaseConfig";
 
-let sniperApp = admin.initializeApp(raidsniperConfig);
+let sniperApp = firebase.initializeApp(raidsniperConfig);
 let sniperDatabase = sniperApp.database()
 
 /* 
@@ -74,6 +74,19 @@ export default class RaidDatabase {
         await guildServersRef.update({
             ping: shouldPing
         })
+    }
+
+    public async GetGuilds(): Promise<Array<string>> {
+        let guildsRef = this.database.ref(`guilds`);
+        let guildsSnapshot = await guildsRef.get();
+        let snowflakeArray: string[] = [];
+
+        guildsSnapshot.forEach(snap => {
+            let key = snap.key as string;
+            snowflakeArray.push(key);
+        })
+
+        return snowflakeArray
     }
 
     public async GetServers(snowflake: string): Promise<Map<string, ServerInfo>> {

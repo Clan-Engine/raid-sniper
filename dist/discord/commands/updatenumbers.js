@@ -12,7 +12,7 @@ let command = {
     description: "update required numbers for notification.\nformat: !updatenumbers [serverid] [numbers]",
     run: async (message, args) => {
         if (!admincheck_1.default(message))
-            return;
+            return message.reply("you dont have admin");
         let serverId = parseInt(args[0]);
         let requiredPlayers = parseInt(args[1]);
         let snowflake = message.guild?.id;

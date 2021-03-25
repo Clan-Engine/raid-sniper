@@ -11,7 +11,7 @@ let command = {
     description: "sets the channel the bot notifies in.\nformat: !setchannel channelname",
     run: async (message, args) => {
         if (!admincheck_1.default(message))
-            return;
+            return message.reply("you dont have admin");
         let channelName = args[0];
         let snowflake = message.guild?.id;
         if (snowflake == null)

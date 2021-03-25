@@ -15,6 +15,13 @@ export default class GuildController {
         }
     }
 
+    public static async UpdateGuild(snowflake: string) {
+        let guild = guilds.get(snowflake);
+        if (guild) {
+            guild.CollectServers();
+        }
+    }
+
     public static async AddGuild(snowflake: string) {
         let guildToAdd = new Guild(snowflake);
         guilds.set(snowflake, guildToAdd);

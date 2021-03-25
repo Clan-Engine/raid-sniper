@@ -9,7 +9,7 @@ let command: CommandInterface = {
     name: "updatenumbers",
     description: "update required numbers for notification.\nformat: !updatenumbers [serverid] [numbers]",
     run: async (message, args) => {
-        if (!admincheck(message)) return;
+        if (!admincheck(message)) return message.reply("you dont have admin");
         let serverId = parseInt(args[0]);
         let requiredPlayers = parseInt(args[1]);
 

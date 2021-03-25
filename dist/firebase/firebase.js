@@ -3,9 +3,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const firebase_admin_1 = __importDefault(require("firebase-admin"));
+const firebase_1 = __importDefault(require("firebase"));
 const firebaseConfig_1 = require("./firebaseConfig");
-let sniperApp = firebase_admin_1.default.initializeApp(firebaseConfig_1.raidsniperConfig);
+let sniperApp = firebase_1.default.initializeApp(firebaseConfig_1.raidsniperConfig);
 let sniperDatabase = sniperApp.database();
 class RaidDatabase {
     constructor() {
@@ -42,6 +42,16 @@ class RaidDatabase {
         await guildServersRef.update({
             ping: shouldPing
         });
+    }
+    async GetGuilds() {
+        let guildsRef = this.database.ref(`guilds`);
+        let guildsSnapshot = await guildsRef.get();
+        let snowflakeArray = [];
+        guildsSnapshot.forEach(snap => {
+            let key = snap.key;
+            snowflakeArray.push(key);
+        });
+        return snowflakeArray;
     }
     async GetServers(snowflake) {
         let guildRef = this.database.ref(`guilds/${snowflake}/servers`);

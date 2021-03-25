@@ -9,7 +9,7 @@ let command: CommandInterface = {
     name: "toggleping",
     description: "toggles pinging for the specified serverid.\nformat: !toggleping [serverid]",
     run: async (message, args) => {
-        if (!admincheck(message)) return;
+        if (!admincheck(message)) return message.reply("you dont have admin");
         let serverId = parseInt(args[0]);
 
         let snowflake = message.guild?.id;

@@ -1,4 +1,5 @@
 import RaidDatabase from "../../firebase/firebase";
+import GuildController from "../../guilds/controller";
 import { PlaceExists } from "../../http/serverinfo";
 import admincheck from "../utility/admincheck";
 import { CommandInterface } from "../utility/commandinterface";
@@ -9,11 +10,11 @@ let command: CommandInterface = {
     name: "addserver",
     description: "adds a server to watch for player's joining.\nformat: !addserver [serverid] [requiredPlayers]",
     run: async (message, args) => {
-        if (!admincheck(message)) return;
+        if (!admincheck(message)) return message.reply("you dont have admin");
         let serverId = parseInt(args[0]);
         let requiredPlayers = parseInt(args[1]);
         
-        let snowflake = message.guild?.id;
+        let snowflake = message.guild?.id as string;
         if (snowflake == null) return;
 
         let placeCollection = await database.GetServers(snowflake);
@@ -24,7 +25,8 @@ let command: CommandInterface = {
         if (!(requiredPlayers > 0)) return message.reply("Required players must be greater than 0");
         
         message.channel.send(`set ${serverId} to notify at ${requiredPlayers} or above`);
-        database.AddServer(snowflake, serverId, requiredPlayers);
+        await database.AddServer(snowflake, serverId, requiredPlayers);
+        setTimeout(() => GuildController.UpdateGuild(snowflake), 5000);
     }
 }
 

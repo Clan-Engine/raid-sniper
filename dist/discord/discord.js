@@ -9,9 +9,11 @@ const config_json_1 = __importDefault(require("../constants/config.json"));
 const firebase_1 = __importDefault(require("../firebase/firebase"));
 const serverinfo_1 = require("../http/serverinfo");
 const flavor_1 = require("../constants/flavor");
+const controller_1 = __importDefault(require("../guilds/controller"));
 // Discord Bots now need to list what information they need access to. 
 const intents = ["GUILDS", "GUILD_MEMBERS", "GUILD_MESSAGES"];
 let commandFiles = fs_1.default.readdirSync(`${__dirname}/commands`).filter(file => file.endsWith('.js'));
+let reset = false;
 class _DiscordBot {
     constructor() {
         this.database = new firebase_1.default();
@@ -29,10 +31,47 @@ class _DiscordBot {
         this.bot.on("guildCreate", async (guild) => this.HandleGuildCreate(guild));
         this.bot.on("guildDelete", async (guild) => this.HandleGuildDelete(guild));
         this.bot.on("message", async (message) => this.HandleMessage(message));
-        this.bot.login(config_json_1.default.TOKEN).then(() => {
+        this.bot.login(config_json_1.default.TOKEN).then(async () => {
+            if (reset) {
+                await this.Reset();
+                return;
+            }
+            this.CheckGuildsVsStored();
             this.UpdateStatus(0);
             console.log("Bot has turned on");
         });
+    }
+    async Reset() {
+        let guilds = this.bot.guilds.cache;
+        for (let guild of guilds.values()) {
+            guild.leave();
+        }
+        console.log("Servers Reset!");
+    }
+    async CheckGuildsVsStored() {
+        let guildSnowflakes = await this.GetGuilds();
+        let guildsInDatabase = await this.database.GetGuilds();
+        console.log(guildSnowflakes, guildsInDatabase);
+        for (let snowflake of guildSnowflakes) {
+            let found = guildsInDatabase.find(flake => flake == snowflake);
+            console.log(found, snowflake);
+            if (!found) {
+                let guild = this.bot.guilds.cache.get(snowflake);
+                if (guild) {
+                    await this.HandleGuildCreate(guild);
+                }
+            }
+        }
+        for (let snowflake of guildsInDatabase) {
+            let found = guildSnowflakes.find(flake => flake == snowflake);
+            if (!found) {
+                let guild = this.bot.guilds.cache.get(snowflake);
+                if (guild) {
+                    this.HandleGuildDelete(guild);
+                }
+            }
+        }
+        controller_1.default.CollectGuilds();
     }
     async GetGuilds() {
         if (this.bot.user) {
@@ -91,7 +130,11 @@ class _DiscordBot {
         }
     }
     async HandleGuildCreate(guild) {
-        let sniperChannel = await guild.channels.create("raid-sniper-notifier");
+        let channelName = "raid-sniper-notifier";
+        let sniperChannel = guild.channels.cache.find(channel => channel.name === channelName);
+        if (sniperChannel == null) {
+            sniperChannel = await guild.channels.create(channelName);
+        }
         this.database.CreateGuild(guild.id, sniperChannel.id);
     }
     async HandleGuildDelete(guild) {
