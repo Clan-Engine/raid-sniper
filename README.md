@@ -1,0 +1,2 @@
+# RAID SNIPER
+The raid sniper is a bot written by tomspell, designed to know when X amount of players are at a specific place. I'm always looking to add new features to the bot, and anyone who is interested in contributing is welcome to do so!
